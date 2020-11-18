@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2020",
+    "removeComments": true,
+    "strict": true,
+    "baseUrl": "./",
+    "incremental": true,
+    "paths": {
+      "@src/*": [
+        "src/*"
+      ]
+    }
+  },
+  "exclude": [
+    "./node_modules"
+  ],
+  "include": [
+    "./src"
+  ]
+}
