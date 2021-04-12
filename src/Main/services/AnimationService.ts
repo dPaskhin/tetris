@@ -1,21 +1,26 @@
+import { injectable } from 'inversify';
+
+@injectable()
 export class AnimationService {
-  private moveDownCounter = 0;
+  private animationPerFrame(fn: () => void): void {
+    fn();
 
-  private animationPerSecondStep(callback: () => void) {
-    if (this.moveDownCounter === 10) {
-      callback();
-
-      this.moveDownCounter = 0;
-    }
-
-    this.moveDownCounter++;
+    requestAnimationFrame(() => this.animationPerFrame(fn));
   }
 
-  public animate(onAnimateStep: () => void, onAnimatePerSecondStep: () => void) {
-    onAnimateStep();
+  private animationPerSecond(fn: () => void): void {
+    setTimeout(() => {
+      fn();
 
-    this.animationPerSecondStep(onAnimatePerSecondStep);
+      requestAnimationFrame(() => this.animationPerSecond(fn));
+    }, 1_000);
+  }
 
-    requestAnimationFrame(() => this.animate(onAnimateStep, onAnimatePerSecondStep));
+  public animate(
+    onAnimatePerFrame: () => void,
+    onAnimatePerSecond: () => void,
+  ): void {
+    this.animationPerFrame(onAnimatePerFrame);
+    this.animationPerSecond(onAnimatePerSecond);
   }
 }

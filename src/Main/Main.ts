@@ -1,80 +1,135 @@
+import { injectable } from 'inversify';
+import { CODE_DOWN, CODE_LEFT, CODE_RIGHT, CODE_UP } from 'keycode-js';
+
 import { ShapeFactory } from '@src/Shape/services/ShapeFactory';
-import { ShapeTypes } from '@src/Shape/enums/ShapeTypes';
-import { CanvasService } from '@src/Canvas/services/CanvasService';
+import { ShapeType } from '@src/Shape/enums/ShapeType';
 import { Shape } from '@src/Shape/Shape';
 import { CanvasFactory } from '@src/Canvas/services/CanvasFactory';
-import { Canvas } from '@src/Canvas/Canvas';
+import { DrawingCanvas } from '@src/Canvas/DrawingCanvas';
 import { AnimationService } from '@src/Main/services/AnimationService';
-import { CODE_DOWN, CODE_LEFT, CODE_RIGHT, CODE_UP } from 'keycode-js';
-import { MoveSidesDirections } from '@src/Shape/enums/MoveSidesDirections';
-import { BarrierTypes } from '@src/Shape/enums/BarrierTypes';
+import { ResultFieldFactory } from '@src/ResultField/services/ResultFieldFactory';
+import { ResultField } from '@src/ResultField/ResultField';
+import { ShapeMoveLimitationService } from '@src/Main/services/ShapeMoveLimitationService';
+import { Direction } from '@src/Common/enums/Direction';
+import { Side } from '@src/Common/enums/Side';
+import { ShapeCollisionResolveService } from '@src/Main/services/ShapeCollisionResolveService';
+import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheckFullService';
+import { GridCanvas } from '@src/Canvas/GridCanvas';
+import { ConfigService } from '@src/Common/services/ConfigService';
 
+@injectable()
 export class Main {
-  private readonly animationService: AnimationService;
+  private readonly resultField: ResultField;
+
+  private readonly drawingCanvas: DrawingCanvas;
+
+  private readonly gridCanvas: GridCanvas;
+
+  private readonly shape: Shape;
 
   constructor(
     private readonly canvasFactory: CanvasFactory,
     private readonly shapeFactory: ShapeFactory,
+    private readonly animationService: AnimationService,
+    private readonly resultFieldFactory: ResultFieldFactory,
+    private readonly shapeMoveLimitationService: ShapeMoveLimitationService,
+    private readonly shapeCollisionResolveService: ShapeCollisionResolveService,
+    private readonly resultFieldUpdateService: ResultFieldCheckFullService,
   ) {
-    this.animationService = new AnimationService();
+    this.resultField = resultFieldFactory.create();
+    this.drawingCanvas = canvasFactory.createDrawingCanvas(
+      ConfigService.CANVAS_WIDTH,
+      ConfigService.CANVAS_HEIGHT,
+    );
+    this.gridCanvas = canvasFactory.createGridCanvas(
+      ConfigService.CANVAS_WIDTH,
+      ConfigService.CANVAS_HEIGHT,
+    );
+    this.shape = shapeFactory.create(ShapeType.STICK);
+
+    this.gridCanvas.drawGrid();
+
+    this.shape.moveToCoords({
+      x: ConfigService.CANVAS_BLOCKS_COUNT_HORIZONTAL / 2 - this.shape.size / 2,
+      y: 0,
+    });
+
+    this.controlsHandler();
+
+    this.animationService.animate(
+      () => this.onAnimatePerFrame(),
+      () => this.onAnimatePerSecond(),
+    );
   }
 
-  private static controlsHandler(shape: Shape) {
-    window.addEventListener('keydown', e => {
+  private controlsHandler(): void {
+    window.addEventListener('keydown', (e) => {
+      const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
+        this.shape,
+        this.resultField,
+      );
+
       if (e.code === CODE_UP) {
-        shape.rotate();
+        this.shape.rotate();
+
+        if (
+          this.shapeMoveLimitationService.isShapeCollision(
+            this.shape,
+            this.resultField,
+          )
+        ) {
+          this.shapeCollisionResolveService.shapeRealise(
+            this.shape,
+            this.resultField,
+          );
+        }
       }
 
-      if (e.code === CODE_DOWN && !shape.checkBarriers(BarrierTypes.BOTTOM)) {
-        shape.moveDown();
+      if (e.code === CODE_DOWN && !shapeMoveLimitations.has(Side.BOTTOM)) {
+        this.shape.moveDown();
       }
 
-      if (e.code === CODE_LEFT && !shape.checkBarriers(BarrierTypes.LEFT)) {
-        shape.moveSides(MoveSidesDirections.LEFT);
+      if (e.code === CODE_LEFT && !shapeMoveLimitations.has(Side.LEFT)) {
+        this.shape.moveDirection(Direction.LEFT);
       }
 
-      if (e.code === CODE_RIGHT && !shape.checkBarriers(BarrierTypes.RIGHT)) {
-        shape.moveSides(MoveSidesDirections.RIGHT);
+      if (e.code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
+        this.shape.moveDirection(Direction.RIGHT);
       }
     });
   }
 
-  private static canvasSetup(canvas: Canvas) {
-    CanvasService.setCanvasSize(canvas.$canvas);
-  }
-
-  private static shapeSetup(shape: Shape) {
-    shape.moveToCoords({ x: 8, y: 0 });
-  }
-
-  private static onAnimateStep(ctx: CanvasRenderingContext2D, shape: Shape) {
-    CanvasService.clear(ctx);
-    CanvasService.drawShape(shape, ctx);
-  }
-
-  private static onAnimatePerSecondStep(shape: Shape) {
-    if (shape.checkBarriers(BarrierTypes.BOTTOM)) {
-      return;
-    }
-
-    shape.moveDown();
-  }
-
-  public execute() {
-    const shape = this.shapeFactory.create(ShapeTypes.T_SHAPE);
-    const canvas = this.canvasFactory.create();
-
-    if (!shape || !canvas) {
-      return;
-    }
-
-    Main.canvasSetup(canvas);
-    Main.shapeSetup(shape);
-    Main.controlsHandler(shape);
-
-    this.animationService.animate(
-      () => Main.onAnimateStep(canvas.ctx, shape),
-      () => Main.onAnimatePerSecondStep(shape),
+  private onAnimatePerFrame(): void {
+    this.drawingCanvas.clear();
+    this.drawingCanvas.drawBlocks(
+      [
+        ...this.shape.blockMatrix.flat(),
+        ...this.resultField.blockMatrix.flat(),
+      ].filter((block) => block.isFilled),
     );
+  }
+
+  private onAnimatePerSecond(): void {
+    const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
+      this.shape,
+      this.resultField,
+    );
+
+    if (shapeMoveLimitations.has(Side.BOTTOM)) {
+      this.resultField.addShape(this.shape);
+
+      const resultFieldFullRows = this.resultFieldUpdateService.getFullRows(
+        this.resultField,
+      );
+
+      if (resultFieldFullRows.length > 0) {
+        this.resultField.deleteRows(resultFieldFullRows);
+      }
+
+      this.shape.mutate();
+      this.shape.moveToCoords({ x: 8, y: 0 });
+    }
+
+    this.shape.moveDown();
   }
 }

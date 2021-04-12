@@ -1,19 +1,15 @@
-import { Canvas } from '@src/Canvas/Canvas';
+import { injectable } from 'inversify';
 
+import { DrawingCanvas } from '@src/Canvas/DrawingCanvas';
+import { GridCanvas } from '@src/Canvas/GridCanvas';
+
+@injectable()
 export class CanvasFactory {
-  public create(): Canvas | undefined {
-    const $canvas = document.getElementById('canvas') as HTMLCanvasElement;
+  public createDrawingCanvas(width: number, height: number): DrawingCanvas {
+    return new DrawingCanvas(width, height);
+  }
 
-    if (!$canvas) {
-      return;
-    }
-
-    const ctx = $canvas.getContext('2d');
-
-    if (!ctx) {
-      return;
-    }
-
-    return new Canvas($canvas, ctx);
+  public createGridCanvas(width: number, height: number): GridCanvas {
+    return new GridCanvas(width, height);
   }
 }

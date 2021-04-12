@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "module": "commonjs",
     "target": "ES2020",
     "removeComments": true,
     "strict": true,
     "baseUrl": "./",
     "incremental": true,
+    "types": ["reflect-metadata"],
     "paths": {
       "@src/*": [
         "src/*"

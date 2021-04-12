@@ -1,51 +1,85 @@
+import { injectable } from 'inversify';
+
 import { ShapeService } from '@src/Shape/services/ShapeService';
-import { IBlockMatrix } from '@src/Shape/interfaces/IBlockMatrix';
-import { BlockFactory } from '@src/Block/services/BlockFactory';
 import { ICoords } from '@src/Common/interfaces/ICoords';
-import { CanvasService } from '@src/Canvas/services/CanvasService';
-import { MoveSidesDirections } from '@src/Shape/enums/MoveSidesDirections';
-import { BarrierTypes } from '@src/Shape/enums/BarrierTypes';
+import { ShapeType } from '@src/Shape/enums/ShapeType';
+import { IBlockMatrix } from '@src/Common/interfaces/IBlockMatrix';
+import { ShapeSize } from '@src/Shape/enums/ShapeSize';
+import { Direction } from '@src/Common/enums/Direction';
 
+@injectable()
 export class Shape {
-  constructor(
-    public blocksMatrix: IBlockMatrix,
-    private readonly blockFactory: BlockFactory,
+  public blockMatrix: IBlockMatrix;
+
+  public size: ShapeSize;
+
+  private _rotateIndex: number;
+
+  public constructor(
+    public type: ShapeType,
+    private readonly shapeService: ShapeService,
   ) {
+    this.blockMatrix = shapeService.createBlockMatrix(type);
+    this.size = shapeService.getSize(type);
+    this._rotateIndex = 0;
   }
 
-  public rotate() {
-    this.blocksMatrix = ShapeService.rotateTransposition(this.blocksMatrix, this.blockFactory);
-  };
+  public mutate(): void {
+    const randomType = this.shapeService.getRandomType();
 
-  public moveDown() {
-    this.blocksMatrix = ShapeService.moveDownTransposition(this.blocksMatrix);
+    this.type = randomType;
+    this.blockMatrix = this.shapeService.createBlockMatrix(randomType);
+    this._rotateIndex = 0;
   }
 
-  public moveSides(direction: MoveSidesDirections) {
-    this.blocksMatrix = ShapeService.moveSidesTransposition(this.blocksMatrix, direction);
+  public rotate(rotateIndex = 1): void {
+    for (let i = 0; i < rotateIndex; i++) {
+      this.blockMatrix = this.shapeService.rotateTransposition(
+        this.blockMatrix,
+      );
+      this._rotateIndex = this._rotateIndex === 3 ? 0 : this._rotateIndex + 1;
+    }
   }
 
-  public moveToCoords(coords: ICoords) {
-    this.blocksMatrix = ShapeService.moveToCoordsTransposition(this.blocksMatrix, coords);
+  public get rotateIndex(): number {
+    return this._rotateIndex;
   }
 
-  public checkBarriers(barrierType: BarrierTypes) {
-    return this.blocksMatrix.some(row => row.some(block => {
-      if (!block.isFilled) {
-        return false;
-      }
+  public moveDirection(direction: Direction, steps?: number): void {
+    this.blockMatrix = this.shapeService.moveDirectionTransposition(
+      this.blockMatrix,
+      direction,
+      steps,
+    );
+  }
 
-      switch (barrierType) {
-        case BarrierTypes.BOTTOM: {
-          return block.isFilled && (block.coords.y >= CanvasService.CANVAS_Y - 1);
-        }
-        case BarrierTypes.LEFT: {
-          return block.coords.x <= 0;
-        }
-        case BarrierTypes.RIGHT: {
-          return block.coords.x >= CanvasService.CANVAS_X - 1;
-        }
-      }
-    }));
+  public moveDown(): void {
+    this.blockMatrix = this.shapeService.moveDirectionTransposition(
+      this.blockMatrix,
+      Direction.DOWN,
+    );
+  }
+
+  public moveToCoords(coords: Partial<ICoords>): void {
+    this.blockMatrix = this.shapeService.moveToCoordsTransposition(
+      this.blockMatrix,
+      {
+        ...this.getCurrentCoords(),
+        ...coords,
+      },
+    );
+  }
+
+  public getCurrentCoords(): ICoords {
+    return this.blockMatrix.flat().reduce<ICoords>(
+      (acc, block) => ({
+        x: block.coords.x < acc.x ? block.coords.x : acc.x,
+        y: block.coords.y < acc.y ? block.coords.y : acc.y,
+      }),
+      {
+        x: Number.POSITIVE_INFINITY,
+        y: Number.POSITIVE_INFINITY,
+      },
+    );
   }
 }
