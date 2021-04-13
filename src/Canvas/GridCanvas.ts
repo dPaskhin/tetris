@@ -1,13 +1,7 @@
 import { BaseCanvas } from '@src/Canvas/BaseCanvas';
-import { CanvasId } from '@src/Canvas/enums/CanvasId';
 import { Palette } from '@src/Common/enums/Palette';
-import { MainCanvasSize } from '@src/Canvas/enums/MainCanvasSize';
 
 export class GridCanvas extends BaseCanvas {
-  constructor() {
-    super(CanvasId.GRID, MainCanvasSize.WIDTH, MainCanvasSize.HEIGHT);
-  }
-
   public drawGrid(): void {
     const data = `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         <defs>

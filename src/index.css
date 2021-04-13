@@ -2,20 +2,39 @@ body {
     margin: 0;
     height: 100vh;
     background-color: lightblue;
+    box-sizing: border-box;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 550px;
+}
+
+.canvas-wrapper {
+    position: relative;
+    border: 5px solid #ccc;
 }
 
 .canvas {
     display: block;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-sizing: border-box;
 }
 
 .canvas--drawing {
     background-color: #fff;
-    border: 5px solid #ccc;
 }
 
-.canvas--grid {}
+.canvas--grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.canvas--shape {
+    background-color: #fff;
+}

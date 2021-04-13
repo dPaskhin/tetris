@@ -16,6 +16,10 @@ import { ShapeCollisionResolveService } from '@src/Main/services/ShapeCollisionR
 import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheckFullService';
 import { GridCanvas } from '@src/Canvas/GridCanvas';
 import { ICoords } from '@src/Common/interfaces/ICoords';
+import { ShapeCanvas } from '@src/Canvas/ShapeCanvas';
+import { CanvasId } from '@src/Canvas/enums/CanvasId';
+import { MainCanvasSize } from '@src/Canvas/enums/MainCanvasSize';
+import { ShapeCanvasSize } from '@src/Canvas/enums/ShapeCanvasSize';
 
 @injectable()
 export class Main {
@@ -23,7 +27,11 @@ export class Main {
 
   private readonly drawingCanvas: DrawingCanvas;
 
-  private readonly gridCanvas: GridCanvas;
+  private readonly shapeCanvas: ShapeCanvas;
+
+  private readonly drawingGridCanvas: GridCanvas;
+
+  private readonly shapeGridCanvas: GridCanvas;
 
   private readonly shape: Shape;
 
@@ -40,10 +48,21 @@ export class Main {
   ) {
     this.resultField = resultFieldFactory.create();
     this.drawingCanvas = canvasFactory.createDrawingCanvas();
-    this.gridCanvas = canvasFactory.createGridCanvas();
+    this.drawingGridCanvas = canvasFactory.createGridCanvas(
+      CanvasId.DRAWING_GRID,
+      MainCanvasSize.WIDTH,
+      MainCanvasSize.HEIGHT,
+    );
+    this.shapeGridCanvas = canvasFactory.createGridCanvas(
+      CanvasId.SHAPE_GRID,
+      ShapeCanvasSize.WIDTH,
+      ShapeCanvasSize.HEIGHT,
+    );
+    this.shapeCanvas = canvasFactory.createShapeCanvas();
     this.shape = shapeFactory.create(ShapeType.STICK);
 
-    this.gridCanvas.drawGrid();
+    this.drawingGridCanvas.drawGrid();
+    this.shapeGridCanvas.drawGrid();
 
     this.drawingCanvasBarriersCoords = {
       x: this.drawingCanvas.blocksCountHorizontal - 1,

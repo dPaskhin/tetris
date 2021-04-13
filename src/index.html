@@ -9,11 +9,18 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
+    <div class="container">
+        <div class="canvas-wrapper">
+            <canvas id="drawing" class="canvas canvas--drawing"></canvas>
+            <canvas id="drawing-grid" class="canvas canvas--grid"></canvas>
+        </div>
 
-    <canvas id="drawing" class="canvas canvas--drawing"></canvas>
-    <canvas id="grid" class="canvas canvas--grid"></canvas>
+        <div class="canvas-wrapper">
+            <canvas id="shape" class="canvas canvas--shape"></canvas>
+            <canvas id="shape-grid" class="canvas canvas--grid"></canvas>
+        </div>
+    </div>
 
     <script src="../dist/index.js"></script>
-
 </body>
 </html>
