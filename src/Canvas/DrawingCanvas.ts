@@ -1,33 +1,29 @@
 import { injectable } from 'inversify';
 
-import { ConfigService } from '@src/Common/services/ConfigService';
 import { Block } from '@src/Block/Block';
 import { BaseCanvas } from '@src/Canvas/BaseCanvas';
 import { CanvasId } from '@src/Canvas/enums/CanvasId';
+import { MainCanvasSize } from '@src/Canvas/enums/MainCanvasSize';
 
 @injectable()
 export class DrawingCanvas extends BaseCanvas {
-  constructor(width: number, height: number) {
-    super(CanvasId.DRAWING, width, height);
+  constructor() {
+    super(CanvasId.DRAWING, MainCanvasSize.WIDTH, MainCanvasSize.HEIGHT);
   }
 
   public drawBlocks(blocks: Block[]): void {
-    blocks.forEach(({ coords, height, width, color, borderColor }) => {
+    blocks.forEach(({ coords, color, borderColor }) => {
       this.ctx.beginPath();
-      this.ctx.rect(coords.x * width, coords.y * height, width, height);
+      this.ctx.rect(
+        coords.x * this.blockSize,
+        coords.y * this.blockSize,
+        this.blockSize,
+        this.blockSize,
+      );
       this.ctx.fillStyle = color;
       this.ctx.fill();
       this.ctx.strokeStyle = borderColor;
       this.ctx.stroke();
     });
-  }
-
-  public clear(): void {
-    this.ctx.clearRect(
-      0,
-      0,
-      ConfigService.CANVAS_WIDTH,
-      ConfigService.CANVAS_HEIGHT,
-    );
   }
 }

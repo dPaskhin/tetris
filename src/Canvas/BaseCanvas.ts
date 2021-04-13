@@ -1,12 +1,20 @@
+import { BlockSize } from '@src/Canvas/enums/BlockSize';
+
 export class BaseCanvas {
   protected readonly $canvas: HTMLCanvasElement;
 
   protected readonly ctx: CanvasRenderingContext2D;
 
+  public readonly blockSize: number;
+
+  public readonly blocksCountHorizontal: number;
+
+  public readonly blocksCountVertical: number;
+
   constructor(
     public readonly id: string,
-    protected readonly width: number,
-    protected readonly height: number,
+    public readonly width: number,
+    public readonly height: number,
   ) {
     const $canvas = document.querySelector(`#${id}`) as HTMLCanvasElement;
 
@@ -25,5 +33,12 @@ export class BaseCanvas {
 
     this.$canvas = $canvas;
     this.ctx = ctx;
+    this.blockSize = BlockSize.SIZE;
+    this.blocksCountHorizontal = this.width / this.blockSize;
+    this.blocksCountVertical = this.height / this.blockSize;
+  }
+
+  public clear(): void {
+    this.ctx.clearRect(0, 0, this.width, this.height);
   }
 }

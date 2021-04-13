@@ -15,7 +15,7 @@ import { Side } from '@src/Common/enums/Side';
 import { ShapeCollisionResolveService } from '@src/Main/services/ShapeCollisionResolveService';
 import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheckFullService';
 import { GridCanvas } from '@src/Canvas/GridCanvas';
-import { ConfigService } from '@src/Common/services/ConfigService';
+import { ICoords } from '@src/Common/interfaces/ICoords';
 
 @injectable()
 export class Main {
@@ -27,6 +27,8 @@ export class Main {
 
   private readonly shape: Shape;
 
+  private readonly drawingCanvasBarriersCoords: ICoords;
+
   constructor(
     private readonly canvasFactory: CanvasFactory,
     private readonly shapeFactory: ShapeFactory,
@@ -37,20 +39,19 @@ export class Main {
     private readonly resultFieldUpdateService: ResultFieldCheckFullService,
   ) {
     this.resultField = resultFieldFactory.create();
-    this.drawingCanvas = canvasFactory.createDrawingCanvas(
-      ConfigService.CANVAS_WIDTH,
-      ConfigService.CANVAS_HEIGHT,
-    );
-    this.gridCanvas = canvasFactory.createGridCanvas(
-      ConfigService.CANVAS_WIDTH,
-      ConfigService.CANVAS_HEIGHT,
-    );
+    this.drawingCanvas = canvasFactory.createDrawingCanvas();
+    this.gridCanvas = canvasFactory.createGridCanvas();
     this.shape = shapeFactory.create(ShapeType.STICK);
 
     this.gridCanvas.drawGrid();
 
+    this.drawingCanvasBarriersCoords = {
+      x: this.drawingCanvas.blocksCountHorizontal - 1,
+      y: this.drawingCanvas.blocksCountVertical - 1,
+    };
+
     this.shape.moveToCoords({
-      x: ConfigService.CANVAS_BLOCKS_COUNT_HORIZONTAL / 2 - this.shape.size / 2,
+      x: this.drawingCanvas.blocksCountHorizontal / 2 - this.shape.size / 2,
       y: 0,
     });
 
@@ -67,6 +68,7 @@ export class Main {
       const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
         this.shape,
         this.resultField,
+        this.drawingCanvasBarriersCoords,
       );
 
       if (e.code === CODE_UP) {
@@ -76,11 +78,13 @@ export class Main {
           this.shapeMoveLimitationService.isShapeCollision(
             this.shape,
             this.resultField,
+            this.drawingCanvasBarriersCoords,
           )
         ) {
           this.shapeCollisionResolveService.shapeRealise(
             this.shape,
             this.resultField,
+            this.drawingCanvasBarriersCoords,
           );
         }
       }
@@ -113,6 +117,7 @@ export class Main {
     const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
       this.shape,
       this.resultField,
+      this.drawingCanvasBarriersCoords,
     );
 
     if (shapeMoveLimitations.has(Side.BOTTOM)) {
@@ -120,6 +125,7 @@ export class Main {
 
       const resultFieldFullRows = this.resultFieldUpdateService.getFullRows(
         this.resultField,
+        this.drawingCanvas.blocksCountHorizontal,
       );
 
       if (resultFieldFullRows.length > 0) {
