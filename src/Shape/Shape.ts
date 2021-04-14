@@ -24,11 +24,9 @@ export class Shape {
     this._rotateIndex = 0;
   }
 
-  public mutate(): void {
-    const randomType = this.shapeService.getRandomType();
-
-    this.type = randomType;
-    this.blockMatrix = this.shapeService.createBlockMatrix(randomType);
+  public update(type: ShapeType): void {
+    this.type = type;
+    this.blockMatrix = this.shapeService.createBlockMatrix(type);
     this._rotateIndex = 0;
   }
 

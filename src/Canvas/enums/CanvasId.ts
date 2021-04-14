@@ -1,6 +1,6 @@
 export enum CanvasId {
-  DRAWING = 'drawing',
-  DRAWING_GRID = 'drawing-grid',
+  MAIN = 'main',
+  MAIN_GRID = 'main-grid',
   SHAPE = 'shape',
   SHAPE_GRID = 'shape-grid',
 }

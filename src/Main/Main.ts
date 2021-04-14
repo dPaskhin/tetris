@@ -5,7 +5,7 @@ import { ShapeFactory } from '@src/Shape/services/ShapeFactory';
 import { ShapeType } from '@src/Shape/enums/ShapeType';
 import { Shape } from '@src/Shape/Shape';
 import { CanvasFactory } from '@src/Canvas/services/CanvasFactory';
-import { DrawingCanvas } from '@src/Canvas/DrawingCanvas';
+import { MainCanvas } from '@src/Canvas/MainCanvas';
 import { AnimationService } from '@src/Main/services/AnimationService';
 import { ResultFieldFactory } from '@src/ResultField/services/ResultFieldFactory';
 import { ResultField } from '@src/ResultField/ResultField';
@@ -20,22 +20,27 @@ import { ShapeCanvas } from '@src/Canvas/ShapeCanvas';
 import { CanvasId } from '@src/Canvas/enums/CanvasId';
 import { MainCanvasSize } from '@src/Canvas/enums/MainCanvasSize';
 import { ShapeCanvasSize } from '@src/Canvas/enums/ShapeCanvasSize';
+import { CommonService } from '@src/Common/services/CommonService';
 
 @injectable()
 export class Main {
   private readonly resultField: ResultField;
 
-  private readonly drawingCanvas: DrawingCanvas;
+  private readonly mainCanvas: MainCanvas;
 
   private readonly shapeCanvas: ShapeCanvas;
 
-  private readonly drawingGridCanvas: GridCanvas;
+  private readonly mainGridCanvas: GridCanvas;
 
   private readonly shapeGridCanvas: GridCanvas;
 
-  private readonly shape: Shape;
+  private readonly mainShape: Shape;
 
-  private readonly drawingCanvasBarriersCoords: ICoords;
+  private readonly futureShape: Shape;
+
+  private readonly mainCanvasBarriersCoords: ICoords;
+
+  private futureShapeType: ShapeType;
 
   constructor(
     private readonly canvasFactory: CanvasFactory,
@@ -45,11 +50,12 @@ export class Main {
     private readonly shapeMoveLimitationService: ShapeMoveLimitationService,
     private readonly shapeCollisionResolveService: ShapeCollisionResolveService,
     private readonly resultFieldUpdateService: ResultFieldCheckFullService,
+    private readonly commonService: CommonService,
   ) {
     this.resultField = resultFieldFactory.create();
-    this.drawingCanvas = canvasFactory.createDrawingCanvas();
-    this.drawingGridCanvas = canvasFactory.createGridCanvas(
-      CanvasId.DRAWING_GRID,
+    this.mainCanvas = canvasFactory.createMainCanvas();
+    this.mainGridCanvas = canvasFactory.createGridCanvas(
+      CanvasId.MAIN_GRID,
       MainCanvasSize.WIDTH,
       MainCanvasSize.HEIGHT,
     );
@@ -59,18 +65,31 @@ export class Main {
       ShapeCanvasSize.HEIGHT,
     );
     this.shapeCanvas = canvasFactory.createShapeCanvas();
-    this.shape = shapeFactory.create(ShapeType.STICK);
 
-    this.drawingGridCanvas.drawGrid();
+    const randomShapeType = this.commonService.getRandomShapeType();
+    const futureRandomShapeType = this.commonService.getRandomShapeType();
+
+    this.mainShape = shapeFactory.create(randomShapeType);
+    this.futureShapeType = futureRandomShapeType;
+    this.futureShape = shapeFactory.create(futureRandomShapeType);
+
+    this.futureShape.moveToCoords({
+      x: 1,
+      y: 1,
+    });
+
+    this.shapeCanvas.drawBlocks(this.futureShape.blockMatrix.flat());
+
+    this.mainGridCanvas.drawGrid();
     this.shapeGridCanvas.drawGrid();
 
-    this.drawingCanvasBarriersCoords = {
-      x: this.drawingCanvas.blocksCountHorizontal - 1,
-      y: this.drawingCanvas.blocksCountVertical - 1,
+    this.mainCanvasBarriersCoords = {
+      x: this.mainCanvas.blocksCountHorizontal - 1,
+      y: this.mainCanvas.blocksCountVertical - 1,
     };
 
-    this.shape.moveToCoords({
-      x: this.drawingCanvas.blocksCountHorizontal / 2 - this.shape.size / 2,
+    this.mainShape.moveToCoords({
+      x: this.mainCanvas.blocksCountHorizontal / 2 - 2,
       y: 0,
     });
 
@@ -85,76 +104,94 @@ export class Main {
   private controlsHandler(): void {
     window.addEventListener('keydown', (e) => {
       const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
-        this.shape,
+        this.mainShape,
         this.resultField,
-        this.drawingCanvasBarriersCoords,
+        this.mainCanvasBarriersCoords,
       );
 
       if (e.code === CODE_UP) {
-        this.shape.rotate();
+        this.mainShape.rotate();
 
         if (
           this.shapeMoveLimitationService.isShapeCollision(
-            this.shape,
+            this.mainShape,
             this.resultField,
-            this.drawingCanvasBarriersCoords,
+            this.mainCanvasBarriersCoords,
           )
         ) {
           this.shapeCollisionResolveService.shapeRealise(
-            this.shape,
+            this.mainShape,
             this.resultField,
-            this.drawingCanvasBarriersCoords,
+            this.mainCanvasBarriersCoords,
           );
         }
       }
 
       if (e.code === CODE_DOWN && !shapeMoveLimitations.has(Side.BOTTOM)) {
-        this.shape.moveDown();
+        this.mainShape.moveDown();
       }
 
       if (e.code === CODE_LEFT && !shapeMoveLimitations.has(Side.LEFT)) {
-        this.shape.moveDirection(Direction.LEFT);
+        this.mainShape.moveDirection(Direction.LEFT);
       }
 
       if (e.code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
-        this.shape.moveDirection(Direction.RIGHT);
+        this.mainShape.moveDirection(Direction.RIGHT);
       }
     });
   }
 
   private onAnimatePerFrame(): void {
-    this.drawingCanvas.clear();
-    this.drawingCanvas.drawBlocks(
+    this.mainCanvas.clear();
+    this.mainCanvas.drawBlocks(
       [
-        ...this.shape.blockMatrix.flat(),
+        ...this.mainShape.blockMatrix.flat(),
         ...this.resultField.blockMatrix.flat(),
       ].filter((block) => block.isFilled),
     );
   }
 
+  private shapeUpdate(): void {
+    const randomShapeType = this.commonService.getRandomShapeType();
+
+    this.mainShape.update(this.futureShapeType);
+    this.mainShape.moveToCoords({
+      x: this.mainCanvas.blocksCountHorizontal / 2 - 2,
+      y: 0,
+    });
+
+    this.futureShapeType = randomShapeType;
+    this.futureShape.update(randomShapeType);
+    this.futureShape.moveToCoords({
+      x: 1,
+      y: 1,
+    });
+    this.shapeCanvas.clear();
+    this.shapeCanvas.drawBlocks(this.futureShape.blockMatrix.flat());
+  }
+
   private onAnimatePerSecond(): void {
     const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
-      this.shape,
+      this.mainShape,
       this.resultField,
-      this.drawingCanvasBarriersCoords,
+      this.mainCanvasBarriersCoords,
     );
 
     if (shapeMoveLimitations.has(Side.BOTTOM)) {
-      this.resultField.addShape(this.shape);
+      this.resultField.addShape(this.mainShape);
 
       const resultFieldFullRows = this.resultFieldUpdateService.getFullRows(
         this.resultField,
-        this.drawingCanvas.blocksCountHorizontal,
+        this.mainCanvas.blocksCountHorizontal,
       );
 
       if (resultFieldFullRows.length > 0) {
         this.resultField.deleteRows(resultFieldFullRows);
       }
 
-      this.shape.mutate();
-      this.shape.moveToCoords({ x: 8, y: 0 });
+      this.shapeUpdate();
     }
 
-    this.shape.moveDown();
+    this.mainShape.moveDown();
   }
 }

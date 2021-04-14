@@ -142,10 +142,4 @@ export class ShapeService {
       }),
     );
   }
-
-  public getRandomType(): ShapeType {
-    return Object.values(ShapeType)[
-      Math.floor(Math.random() * Object.values(ShapeType).length)
-    ];
-  }
 }

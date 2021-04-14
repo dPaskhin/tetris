@@ -1,4 +1,4 @@
 export enum ShapeCanvasSize {
-  WIDTH = 120,
-  HEIGHT = 120,
+  WIDTH = 100,
+  HEIGHT = 80,
 }

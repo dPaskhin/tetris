@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 
 import { IBlockMatrix } from '@src/Common/interfaces/IBlockMatrix';
 import { Block } from '@src/Block/Block';
+import { ShapeType } from '@src/Shape/enums/ShapeType';
 
 @injectable()
 export class CommonService {
@@ -41,5 +42,11 @@ export class CommonService {
     ${360 * Math.random()},
     ${25 + 70 * Math.random()}%,
     ${85 + 10 * Math.random()}%)`;
+  }
+
+  public getRandomShapeType(): ShapeType {
+    return Object.values(ShapeType)[
+      Math.floor(Math.random() * Object.values(ShapeType).length)
+    ];
   }
 }
