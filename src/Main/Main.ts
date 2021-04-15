@@ -173,7 +173,7 @@ export class Main {
       shapeMoveLimitations.has(Side.BOTTOM) &&
       !this.isMainShapeBottomContact
     ) {
-      this.isMainShapeBottomContact = shapeMoveLimitations.has(Side.BOTTOM);
+      this.isMainShapeBottomContact = true;
 
       this.mainShapeBottomContactTimer.start(() => {
         this.resultField.addShape(this.mainShape);
@@ -188,7 +188,7 @@ export class Main {
         }
 
         this.shapeUpdate();
-      }, 100);
+      }, 500);
     }
   }
 
