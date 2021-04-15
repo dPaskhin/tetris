@@ -1,9 +1,6 @@
-import { injectable } from 'inversify';
-
 import { ICoords } from '@src/Common/interfaces/ICoords';
 import { Palette } from '@src/Common/enums/Palette';
 
-@injectable()
 export class Block {
   public readonly isFilled: boolean;
 

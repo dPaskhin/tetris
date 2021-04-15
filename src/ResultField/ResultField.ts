@@ -1,11 +1,8 @@
-import { injectable } from 'inversify';
-
 import { Shape } from '@src/Shape/Shape';
 import { IBlockMatrix } from '@src/Common/interfaces/IBlockMatrix';
 import { CommonService } from '@src/Common/services/CommonService';
 import { ResultFieldService } from '@src/ResultField/services/ResultFieldService';
 
-@injectable()
 export class ResultField {
   public blockMatrix: IBlockMatrix = [];
 

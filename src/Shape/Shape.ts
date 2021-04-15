@@ -1,5 +1,3 @@
-import { injectable } from 'inversify';
-
 import { ShapeService } from '@src/Shape/services/ShapeService';
 import { ICoords } from '@src/Common/interfaces/ICoords';
 import { ShapeType } from '@src/Shape/enums/ShapeType';
@@ -7,7 +5,6 @@ import { IBlockMatrix } from '@src/Common/interfaces/IBlockMatrix';
 import { ShapeSize } from '@src/Shape/enums/ShapeSize';
 import { Direction } from '@src/Common/enums/Direction';
 
-@injectable()
 export class Shape {
   public blockMatrix: IBlockMatrix;
 
