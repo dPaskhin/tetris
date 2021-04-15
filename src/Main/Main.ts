@@ -21,6 +21,8 @@ import { CanvasId } from '@src/Canvas/enums/CanvasId';
 import { MainCanvasSize } from '@src/Canvas/enums/MainCanvasSize';
 import { ShapeCanvasSize } from '@src/Canvas/enums/ShapeCanvasSize';
 import { CommonService } from '@src/Common/services/CommonService';
+import { TimerFactory } from '@src/Timer/services/TimerFactory';
+import { Timer } from '@src/Timer/Timer';
 
 @injectable()
 export class Main {
@@ -40,7 +42,11 @@ export class Main {
 
   private readonly mainCanvasBarriersCoords: ICoords;
 
+  private readonly mainShapeBottomContactTimer: Timer;
+
   private futureShapeType: ShapeType;
+
+  private isMainShapeBottomContact: boolean;
 
   constructor(
     private readonly canvasFactory: CanvasFactory,
@@ -51,6 +57,7 @@ export class Main {
     private readonly shapeCollisionResolveService: ShapeCollisionResolveService,
     private readonly resultFieldUpdateService: ResultFieldCheckFullService,
     private readonly commonService: CommonService,
+    private readonly timerFactory: TimerFactory,
   ) {
     this.resultField = resultFieldFactory.create();
     this.mainCanvas = canvasFactory.createMainCanvas();
@@ -99,10 +106,16 @@ export class Main {
       () => this.onAnimatePerFrame(),
       () => this.onAnimatePerSecond(),
     );
+
+    this.mainShapeBottomContactTimer = this.timerFactory.create();
+    this.isMainShapeBottomContact = false;
   }
 
   private controlsHandler(): void {
     window.addEventListener('keydown', (e) => {
+      this.isMainShapeBottomContact = false;
+      this.mainShapeBottomContactTimer.stop();
+
       const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
         this.mainShape,
         this.resultField,
@@ -142,6 +155,12 @@ export class Main {
   }
 
   private onAnimatePerFrame(): void {
+    const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
+      this.mainShape,
+      this.resultField,
+      this.mainCanvasBarriersCoords,
+    );
+
     this.mainCanvas.clear();
     this.mainCanvas.drawBlocks(
       [
@@ -149,6 +168,28 @@ export class Main {
         ...this.resultField.blockMatrix.flat(),
       ].filter((block) => block.isFilled),
     );
+
+    if (
+      shapeMoveLimitations.has(Side.BOTTOM) &&
+      !this.isMainShapeBottomContact
+    ) {
+      this.isMainShapeBottomContact = shapeMoveLimitations.has(Side.BOTTOM);
+
+      this.mainShapeBottomContactTimer.start(() => {
+        this.resultField.addShape(this.mainShape);
+
+        const resultFieldFullRows = this.resultFieldUpdateService.getFullRows(
+          this.resultField,
+          this.mainCanvas.blocksCountHorizontal,
+        );
+
+        if (resultFieldFullRows.length > 0) {
+          this.resultField.deleteRows(resultFieldFullRows);
+        }
+
+        this.shapeUpdate();
+      }, 100);
+    }
   }
 
   private shapeUpdate(): void {
@@ -168,6 +209,7 @@ export class Main {
     });
     this.shapeCanvas.clear();
     this.shapeCanvas.drawBlocks(this.futureShape.blockMatrix.flat());
+    this.isMainShapeBottomContact = false;
   }
 
   private onAnimatePerSecond(): void {
@@ -177,21 +219,8 @@ export class Main {
       this.mainCanvasBarriersCoords,
     );
 
-    if (shapeMoveLimitations.has(Side.BOTTOM)) {
-      this.resultField.addShape(this.mainShape);
-
-      const resultFieldFullRows = this.resultFieldUpdateService.getFullRows(
-        this.resultField,
-        this.mainCanvas.blocksCountHorizontal,
-      );
-
-      if (resultFieldFullRows.length > 0) {
-        this.resultField.deleteRows(resultFieldFullRows);
-      }
-
-      this.shapeUpdate();
+    if (!shapeMoveLimitations.has(Side.BOTTOM)) {
+      this.mainShape.moveDown();
     }
-
-    this.mainShape.moveDown();
   }
 }
