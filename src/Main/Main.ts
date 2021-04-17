@@ -196,14 +196,32 @@ export class Main {
     }
   }
 
+  private endGame(): void {
+    this.animation.stop();
+    alert('Game over');
+  }
+
   private shapeUpdate(): void {
     const randomShapeType = this.commonService.getRandomShapeType();
 
     this.mainShape.update(this.futureShapeType);
+
     this.mainShape.moveToCoords({
       x: this.mainCanvas.blocksCountHorizontal / 2 - 2,
       y: 0,
     });
+
+    if (
+      this.shapeMoveLimitationService.isShapeCollision(
+        this.mainShape,
+        this.resultField,
+        this.mainCanvasBarriersCoords,
+      )
+    ) {
+      this.endGame();
+
+      return;
+    }
 
     this.futureShapeType = randomShapeType;
     this.futureShape.update(randomShapeType);
