@@ -6,7 +6,6 @@ import { ShapeType } from '@src/Shape/enums/ShapeType';
 import { Shape } from '@src/Shape/Shape';
 import { CanvasFactory } from '@src/Canvas/services/CanvasFactory';
 import { MainCanvas } from '@src/Canvas/MainCanvas';
-import { AnimationService } from '@src/Main/services/AnimationService';
 import { ResultFieldFactory } from '@src/ResultField/services/ResultFieldFactory';
 import { ResultField } from '@src/ResultField/ResultField';
 import { ShapeMoveLimitationService } from '@src/Main/services/ShapeMoveLimitationService';
@@ -23,9 +22,13 @@ import { ShapeCanvasSize } from '@src/Canvas/enums/ShapeCanvasSize';
 import { CommonService } from '@src/Common/services/CommonService';
 import { TimerFactory } from '@src/Timer/services/TimerFactory';
 import { Timer } from '@src/Timer/Timer';
+import { AnimationFactory } from '@src/Animation/services/AnimationFactory';
+import { Animation } from '@src/Animation/Animation';
 
 @injectable()
 export class Main {
+  private readonly animation: Animation;
+
   private readonly resultField: ResultField;
 
   private readonly mainCanvas: MainCanvas;
@@ -51,14 +54,15 @@ export class Main {
   constructor(
     private readonly canvasFactory: CanvasFactory,
     private readonly shapeFactory: ShapeFactory,
-    private readonly animationService: AnimationService,
     private readonly resultFieldFactory: ResultFieldFactory,
     private readonly shapeMoveLimitationService: ShapeMoveLimitationService,
     private readonly shapeCollisionResolveService: ShapeCollisionResolveService,
     private readonly resultFieldUpdateService: ResultFieldCheckFullService,
     private readonly commonService: CommonService,
     private readonly timerFactory: TimerFactory,
+    private readonly animationFactory: AnimationFactory,
   ) {
+    this.animation = animationFactory.create();
     this.resultField = resultFieldFactory.create();
     this.mainCanvas = canvasFactory.createMainCanvas();
     this.mainGridCanvas = canvasFactory.createGridCanvas(
@@ -102,7 +106,7 @@ export class Main {
 
     this.controlsHandler();
 
-    this.animationService.animate(
+    this.animation.animate(
       () => this.onAnimatePerFrame(),
       () => this.onAnimatePerSecond(),
     );
