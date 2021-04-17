@@ -75,9 +75,8 @@ export class ShapeService {
     }
   }
 
-  public createBlockMatrix(type: ShapeType): IBlockMatrix {
+  public createBlockMatrix(type: ShapeType, color: string): IBlockMatrix {
     const shapeSize = this.getSize(type);
-    const blockColor = this.commonService.getRandomColor();
 
     return this.commonService.createArray(shapeSize).map((_, rowIdx) =>
       this.commonService.createArray(shapeSize).map((__, blockIdx) =>
@@ -87,7 +86,7 @@ export class ShapeService {
             x: blockIdx,
             y: rowIdx,
           }),
-          blockColor,
+          color,
         ),
       ),
     );

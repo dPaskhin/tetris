@@ -14,16 +14,18 @@ export class Shape {
 
   public constructor(
     public type: ShapeType,
+    public color: string = '',
     private readonly shapeService: ShapeService,
   ) {
-    this.blockMatrix = shapeService.createBlockMatrix(type);
+    this.blockMatrix = shapeService.createBlockMatrix(type, color);
     this.size = shapeService.getSize(type);
     this._rotateIndex = 0;
   }
 
-  public update(type: ShapeType): void {
+  public update(type: ShapeType, color: string): void {
     this.type = type;
-    this.blockMatrix = this.shapeService.createBlockMatrix(type);
+    this.color = color;
+    this.blockMatrix = this.shapeService.createBlockMatrix(type, color);
     this._rotateIndex = 0;
   }
 

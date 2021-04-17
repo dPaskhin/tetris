@@ -8,7 +8,7 @@ import { ShapeService } from '@src/Shape/services/ShapeService';
 export class ShapeFactory {
   constructor(private readonly shapeService: ShapeService) {}
 
-  public create(type: ShapeType): Shape {
-    return new Shape(type, this.shapeService);
+  public create(type: ShapeType, color?: string): Shape {
+    return new Shape(type, color, this.shapeService);
   }
 }

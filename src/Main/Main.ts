@@ -49,6 +49,8 @@ export class Main {
 
   private futureShapeType: ShapeType;
 
+  private futureShapeColor: string;
+
   private isMainShapeBottomContact: boolean;
 
   constructor(
@@ -78,11 +80,17 @@ export class Main {
     this.shapeCanvas = canvasFactory.createShapeCanvas();
 
     const randomShapeType = this.commonService.getRandomShapeType();
+    const randomShapeColor = this.commonService.getRandomColor();
     const futureRandomShapeType = this.commonService.getRandomShapeType();
+    const futureRandomShapeColor = this.commonService.getRandomColor();
 
-    this.mainShape = shapeFactory.create(randomShapeType);
+    this.mainShape = shapeFactory.create(randomShapeType, randomShapeColor);
     this.futureShapeType = futureRandomShapeType;
-    this.futureShape = shapeFactory.create(futureRandomShapeType);
+    this.futureShapeColor = futureRandomShapeColor;
+    this.futureShape = shapeFactory.create(
+      futureRandomShapeType,
+      futureRandomShapeColor,
+    );
 
     this.futureShape.moveToCoords({
       x: 1,
@@ -116,9 +124,11 @@ export class Main {
   }
 
   private controlsHandler(): void {
-    window.addEventListener('keydown', (e) => {
-      this.isMainShapeBottomContact = false;
-      this.mainShapeBottomContactTimer.stop();
+    window.addEventListener('keydown', ({ code }) => {
+      if (code !== CODE_DOWN) {
+        this.isMainShapeBottomContact = false;
+        this.mainShapeBottomContactTimer.stop();
+      }
 
       const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
         this.mainShape,
@@ -126,7 +136,7 @@ export class Main {
         this.mainCanvasBarriersCoords,
       );
 
-      if (e.code === CODE_UP) {
+      if (code === CODE_UP) {
         this.mainShape.rotate();
 
         if (
@@ -144,15 +154,15 @@ export class Main {
         }
       }
 
-      if (e.code === CODE_DOWN && !shapeMoveLimitations.has(Side.BOTTOM)) {
+      if (code === CODE_DOWN && !shapeMoveLimitations.has(Side.BOTTOM)) {
         this.mainShape.moveDown();
       }
 
-      if (e.code === CODE_LEFT && !shapeMoveLimitations.has(Side.LEFT)) {
+      if (code === CODE_LEFT && !shapeMoveLimitations.has(Side.LEFT)) {
         this.mainShape.moveDirection(Direction.LEFT);
       }
 
-      if (e.code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
+      if (code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
         this.mainShape.moveDirection(Direction.RIGHT);
       }
     });
@@ -203,8 +213,9 @@ export class Main {
 
   private shapeUpdate(): void {
     const randomShapeType = this.commonService.getRandomShapeType();
+    const randomShapeColor = this.commonService.getRandomColor();
 
-    this.mainShape.update(this.futureShapeType);
+    this.mainShape.update(this.futureShapeType, this.futureShapeColor);
 
     this.mainShape.moveToCoords({
       x: this.mainCanvas.blocksCountHorizontal / 2 - 2,
@@ -224,7 +235,8 @@ export class Main {
     }
 
     this.futureShapeType = randomShapeType;
-    this.futureShape.update(randomShapeType);
+    this.futureShapeColor = randomShapeColor;
+    this.futureShape.update(randomShapeType, randomShapeColor);
     this.futureShape.moveToCoords({
       x: 1,
       y: 1,
