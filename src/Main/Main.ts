@@ -24,6 +24,8 @@ import { TimerFactory } from '@src/Timer/services/TimerFactory';
 import { Timer } from '@src/Timer/Timer';
 import { AnimationFactory } from '@src/Animation/services/AnimationFactory';
 import { Animation } from '@src/Animation/Animation';
+import { ScoreFactory } from '@src/Score/services/ScoreFactory';
+import { Score } from '@src/Score/Score';
 
 @injectable()
 export class Main {
@@ -47,6 +49,8 @@ export class Main {
 
   private readonly mainShapeBottomContactTimer: Timer;
 
+  private readonly score: Score;
+
   private futureShapeType: ShapeType;
 
   private futureShapeColor: string;
@@ -63,6 +67,7 @@ export class Main {
     private readonly commonService: CommonService,
     private readonly timerFactory: TimerFactory,
     private readonly animationFactory: AnimationFactory,
+    private readonly scoreFactory: ScoreFactory,
   ) {
     this.animation = animationFactory.create();
     this.resultField = resultFieldFactory.create();
@@ -78,6 +83,7 @@ export class Main {
       ShapeCanvasSize.HEIGHT,
     );
     this.shapeCanvas = canvasFactory.createShapeCanvas();
+    this.score = scoreFactory.create();
 
     const randomShapeType = this.commonService.getRandomShapeType();
     const randomShapeColor = this.commonService.getRandomColor();
@@ -198,7 +204,7 @@ export class Main {
         );
 
         if (resultFieldFullRows.length > 0) {
-          this.resultField.deleteRows(resultFieldFullRows);
+          this.deleteResultFieldFullRows(resultFieldFullRows);
         }
 
         this.shapeUpdate();
@@ -209,6 +215,14 @@ export class Main {
   private endGame(): void {
     this.animation.stop();
     alert('Game over');
+  }
+
+  private deleteResultFieldFullRows(rowIds: number[]): void {
+    this.resultField.deleteRows(rowIds);
+    const linesScore = this.score.lines + rowIds.length;
+
+    this.score.updateLines(linesScore);
+    this.score.updateLevel(Math.floor(linesScore / 10));
   }
 
   private shapeUpdate(): void {

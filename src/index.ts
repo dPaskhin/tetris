@@ -14,6 +14,7 @@ import { ShapeCollisionResolveService } from '@src/Main/services/ShapeCollisionR
 import { ResultFieldService } from '@src/ResultField/services/ResultFieldService';
 import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheckFullService';
 import { TimerFactory } from '@src/Timer/services/TimerFactory';
+import { ScoreFactory } from '@src/Score/services/ScoreFactory';
 
 const container = new Container();
 
@@ -34,6 +35,7 @@ container
   .bind<ResultFieldCheckFullService>(ResultFieldCheckFullService)
   .toSelf();
 container.bind<TimerFactory>(TimerFactory).toSelf();
+container.bind<ScoreFactory>(ScoreFactory).toSelf();
 
 document.addEventListener('DOMContentLoaded', () => {
   try {

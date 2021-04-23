@@ -13,10 +13,10 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 550px;
+    width: 700px;
 }
 
-.canvas-wrapper {
+.bordered-wrapper {
     position: relative;
     border: 5px solid #ccc;
 }
@@ -37,4 +37,23 @@ body {
 
 .canvas--shape {
     background-color: #fff;
+}
+
+.score {
+    background-color: #fff;
+    width: 100px;
+}
+
+.score hr {
+    margin: 0;
+}
+
+.score__row {
+    padding: 10px;
+}
+
+.score__title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
 }

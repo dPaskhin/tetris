@@ -5,17 +5,41 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Tetris</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <div class="container">
-        <div class="canvas-wrapper">
+        <div class="bordered-wrapper">
+            <div id="score">
+                <div class="score">
+                    <div class="score__row">
+                        <div class="score__title">
+                            Lines
+                        </div>
+
+                        <div class="score__value" id="lines"></div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="score__row">
+                        <div class="score__title">
+                            Level
+                        </div>
+
+                        <div class="score__value" id="level"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bordered-wrapper">
             <canvas id="main" class="canvas canvas--main"></canvas>
             <canvas id="main-grid" class="canvas canvas--grid"></canvas>
         </div>
 
-        <div class="canvas-wrapper">
+        <div class="bordered-wrapper">
             <canvas id="shape" class="canvas canvas--shape"></canvas>
             <canvas id="shape-grid" class="canvas canvas--grid"></canvas>
         </div>
