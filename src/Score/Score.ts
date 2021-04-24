@@ -25,13 +25,15 @@ export class Score {
     this.$level.textContent = this.level.toLocaleString();
   }
 
-  public updateLines(lines: number): void {
-    this.lines = lines;
-    this.$lines.textContent = this.lines.toLocaleString();
-  }
-
-  public updateLevel(level: number): void {
+  private updateLevel(level: number): void {
     this.level = level;
     this.$level.textContent = this.level.toLocaleString();
+  }
+
+  public addLines(lines: number): void {
+    this.lines += lines;
+    this.$lines.textContent = this.lines.toLocaleString();
+
+    this.updateLevel(Math.ceil(this.lines / 10));
   }
 }

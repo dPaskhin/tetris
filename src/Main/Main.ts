@@ -122,7 +122,7 @@ export class Main {
 
     this.animation.animate(
       () => this.onAnimatePerFrame(),
-      () => this.onAnimatePerSecond(),
+      () => this.onAnimatePerStep(),
     );
 
     this.mainShapeBottomContactTimer = this.timerFactory.create();
@@ -219,10 +219,8 @@ export class Main {
 
   private deleteResultFieldFullRows(rowIds: number[]): void {
     this.resultField.deleteRows(rowIds);
-    const linesScore = this.score.lines + rowIds.length;
-
-    this.score.updateLines(linesScore);
-    this.score.updateLevel(Math.floor(linesScore / 10));
+    this.score.addLines(rowIds.length);
+    this.animation.updateStepTime(this.score.level);
   }
 
   private shapeUpdate(): void {
@@ -260,7 +258,7 @@ export class Main {
     this.isMainShapeBottomContact = false;
   }
 
-  private onAnimatePerSecond(): void {
+  private onAnimatePerStep(): void {
     const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
       this.mainShape,
       this.resultField,
