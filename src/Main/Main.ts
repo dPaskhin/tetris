@@ -1,5 +1,11 @@
 import { injectable } from 'inversify';
-import { CODE_DOWN, CODE_LEFT, CODE_RIGHT, CODE_UP } from 'keycode-js';
+import {
+  CODE_DOWN,
+  CODE_LEFT,
+  CODE_RIGHT,
+  CODE_SPACE,
+  CODE_UP,
+} from 'keycode-js';
 
 import { ShapeFactory } from '@src/Shape/services/ShapeFactory';
 import { ShapeType } from '@src/Shape/enums/ShapeType';
@@ -170,6 +176,24 @@ export class Main {
 
       if (code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
         this.mainShape.moveDirection(Direction.RIGHT);
+      }
+
+      if (code === CODE_SPACE) {
+        while (true) {
+          this.mainShape.moveDown();
+
+          if (
+            this.shapeMoveLimitationService
+              .getLimitationSides(
+                this.mainShape,
+                this.resultField,
+                this.mainCanvasBarriersCoords,
+              )
+              .has(Side.BOTTOM)
+          ) {
+            break;
+          }
+        }
       }
     });
   }
