@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 
 import { Shape } from '@src/Shape/Shape';
 import { ResultField } from '@src/ResultField/ResultField';
-import { ShapeMoveLimitationService } from '@src/Main/services/ShapeMoveLimitationService';
+import { ShapeMoveLimitationService } from '@src/Common/services/ShapeMoveLimitationService';
 import { ICoords } from '@src/Common/interfaces/ICoords';
 
 @injectable()
@@ -11,6 +11,7 @@ export class ShapeCollisionResolveService {
     private readonly shapeMoveLimitationService: ShapeMoveLimitationService,
   ) {}
 
+  // TODO refactor this, service must not mutate anything. Need to return info about possible shape realise
   public shapeRealise(
     shape: Shape,
     resultField: ResultField,

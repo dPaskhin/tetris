@@ -9,12 +9,13 @@ import { BlockFactory } from '@src/Block/services/BlockFactory';
 import { ResultFieldFactory } from '@src/ResultField/services/ResultFieldFactory';
 import { ShapeService } from '@src/Shape/services/ShapeService';
 import { CommonService } from '@src/Common/services/CommonService';
-import { ShapeMoveLimitationService } from '@src/Main/services/ShapeMoveLimitationService';
-import { ShapeCollisionResolveService } from '@src/Main/services/ShapeCollisionResolveService';
+import { ShapeMoveLimitationService } from '@src/Common/services/ShapeMoveLimitationService';
+import { ShapeCollisionResolveService } from '@src/Common/services/ShapeCollisionResolveService';
 import { ResultFieldService } from '@src/ResultField/services/ResultFieldService';
 import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheckFullService';
 import { TimerFactory } from '@src/Timer/services/TimerFactory';
 import { ScoreFactory } from '@src/Score/services/ScoreFactory';
+import { KeyControlsFactory } from '@src/KeyControls/services/KeyControlsFactory';
 
 const container = new Container();
 
@@ -36,6 +37,7 @@ container
   .toSelf();
 container.bind<TimerFactory>(TimerFactory).toSelf();
 container.bind<ScoreFactory>(ScoreFactory).toSelf();
+container.bind<KeyControlsFactory>(KeyControlsFactory).toSelf();
 
 document.addEventListener('DOMContentLoaded', () => {
   try {

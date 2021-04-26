@@ -1,11 +1,4 @@
 import { injectable } from 'inversify';
-import {
-  CODE_DOWN,
-  CODE_LEFT,
-  CODE_RIGHT,
-  CODE_SPACE,
-  CODE_UP,
-} from 'keycode-js';
 
 import { ShapeFactory } from '@src/Shape/services/ShapeFactory';
 import { ShapeType } from '@src/Shape/enums/ShapeType';
@@ -14,10 +7,9 @@ import { CanvasFactory } from '@src/Canvas/services/CanvasFactory';
 import { MainCanvas } from '@src/Canvas/MainCanvas';
 import { ResultFieldFactory } from '@src/ResultField/services/ResultFieldFactory';
 import { ResultField } from '@src/ResultField/ResultField';
-import { ShapeMoveLimitationService } from '@src/Main/services/ShapeMoveLimitationService';
-import { Direction } from '@src/Common/enums/Direction';
+import { ShapeMoveLimitationService } from '@src/Common/services/ShapeMoveLimitationService';
 import { Side } from '@src/Common/enums/Side';
-import { ShapeCollisionResolveService } from '@src/Main/services/ShapeCollisionResolveService';
+import { ShapeCollisionResolveService } from '@src/Common/services/ShapeCollisionResolveService';
 import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheckFullService';
 import { GridCanvas } from '@src/Canvas/GridCanvas';
 import { ICoords } from '@src/Common/interfaces/ICoords';
@@ -32,6 +24,7 @@ import { AnimationFactory } from '@src/Animation/services/AnimationFactory';
 import { Animation } from '@src/Animation/Animation';
 import { ScoreFactory } from '@src/Score/services/ScoreFactory';
 import { Score } from '@src/Score/Score';
+import { KeyControlsFactory } from '@src/KeyControls/services/KeyControlsFactory';
 
 @injectable()
 export class Main {
@@ -74,6 +67,7 @@ export class Main {
     private readonly timerFactory: TimerFactory,
     private readonly animationFactory: AnimationFactory,
     private readonly scoreFactory: ScoreFactory,
+    private readonly keyControlsFactory: KeyControlsFactory,
   ) {
     this.animation = animationFactory.create();
     this.resultField = resultFieldFactory.create();
@@ -124,7 +118,15 @@ export class Main {
       y: 0,
     });
 
-    this.controlsHandler();
+    this.keyControlsFactory.create({
+      shape: this.mainShape,
+      resultField: this.resultField,
+      canvas: this.mainCanvas,
+      onAnyKeyPress: () => {
+        this.isMainShapeBottomContact = false;
+        this.mainShapeBottomContactTimer.stop();
+      },
+    });
 
     this.animation.animate(
       () => this.onAnimatePerFrame(),
@@ -133,69 +135,6 @@ export class Main {
 
     this.mainShapeBottomContactTimer = this.timerFactory.create();
     this.isMainShapeBottomContact = false;
-  }
-
-  private controlsHandler(): void {
-    window.addEventListener('keydown', ({ code }) => {
-      if (code !== CODE_DOWN) {
-        this.isMainShapeBottomContact = false;
-        this.mainShapeBottomContactTimer.stop();
-      }
-
-      const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
-        this.mainShape,
-        this.resultField,
-        this.mainCanvasBarriersCoords,
-      );
-
-      if (code === CODE_UP) {
-        this.mainShape.rotate();
-
-        if (
-          this.shapeMoveLimitationService.isShapeCollision(
-            this.mainShape,
-            this.resultField,
-            this.mainCanvasBarriersCoords,
-          )
-        ) {
-          this.shapeCollisionResolveService.shapeRealise(
-            this.mainShape,
-            this.resultField,
-            this.mainCanvasBarriersCoords,
-          );
-        }
-      }
-
-      if (code === CODE_DOWN && !shapeMoveLimitations.has(Side.BOTTOM)) {
-        this.mainShape.moveDown();
-      }
-
-      if (code === CODE_LEFT && !shapeMoveLimitations.has(Side.LEFT)) {
-        this.mainShape.moveDirection(Direction.LEFT);
-      }
-
-      if (code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
-        this.mainShape.moveDirection(Direction.RIGHT);
-      }
-
-      if (code === CODE_SPACE) {
-        while (true) {
-          this.mainShape.moveDown();
-
-          if (
-            this.shapeMoveLimitationService
-              .getLimitationSides(
-                this.mainShape,
-                this.resultField,
-                this.mainCanvasBarriersCoords,
-              )
-              .has(Side.BOTTOM)
-          ) {
-            break;
-          }
-        }
-      }
-    });
   }
 
   private onAnimatePerFrame(): void {
