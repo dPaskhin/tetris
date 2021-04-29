@@ -1,18 +1,29 @@
-import { IAnyFunction } from '@src/Common/interfaces/IAnyFunction';
-
 export class Timer {
   private timerId: number;
 
-  constructor() {
+  public isContinue = false;
+
+  constructor(
+    private readonly timer: () => void,
+    private readonly timeout: number = 0,
+  ) {
     this.timerId = 0;
   }
 
-  public start(timer: IAnyFunction, timeout?: number): void {
+  public start(): void {
+    this.timerId = setTimeout(() => {
+      this.timer();
+    }, this.timeout);
+    this.isContinue = true;
+  }
+
+  public restart(): void {
     this.stop();
-    this.timerId = setTimeout(timer, timeout || 0);
+    this.start();
   }
 
   public stop(): void {
     clearTimeout(this.timerId);
+    this.isContinue = false;
   }
 }

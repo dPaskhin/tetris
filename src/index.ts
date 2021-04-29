@@ -16,6 +16,7 @@ import { ResultFieldCheckFullService } from '@src/Main/services/ResultFieldCheck
 import { TimerFactory } from '@src/Timer/services/TimerFactory';
 import { ScoreFactory } from '@src/Score/services/ScoreFactory';
 import { KeyControlsFactory } from '@src/KeyControls/services/KeyControlsFactory';
+import { ShapeHandlerFactory } from '@src/ShapeHandler/services/ShapeHandlerFactory';
 
 const container = new Container();
 
@@ -38,6 +39,7 @@ container
 container.bind<TimerFactory>(TimerFactory).toSelf();
 container.bind<ScoreFactory>(ScoreFactory).toSelf();
 container.bind<KeyControlsFactory>(KeyControlsFactory).toSelf();
+container.bind<ShapeHandlerFactory>(ShapeHandlerFactory).toSelf();
 
 document.addEventListener('DOMContentLoaded', () => {
   try {

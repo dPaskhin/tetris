@@ -14,7 +14,7 @@ import { ShapeMoveLimitationService } from '@src/Common/services/ShapeMoveLimita
 import { ICoords } from '@src/Common/interfaces/ICoords';
 import { MainCanvas } from '@src/Canvas/MainCanvas';
 import { ShapeCollisionResolveService } from '@src/Common/services/ShapeCollisionResolveService';
-import { IAnyFunction } from '@src/Common/interfaces/IAnyFunction';
+import { IDummyFunction } from '@src/Common/interfaces/IDummyFunction';
 
 export class KeyControls {
   private readonly canvasBarriersCoords: ICoords;
@@ -23,11 +23,9 @@ export class KeyControls {
     private readonly shape: Shape,
     private readonly resultField: ResultField,
     private readonly canvas: MainCanvas,
-    private readonly onAnyKeyPress: IAnyFunction,
     private readonly shapeMoveLimitationService: ShapeMoveLimitationService,
     private readonly shapeCollisionResolveService: ShapeCollisionResolveService,
   ) {
-    this.controlsHandler();
     this.canvasBarriersCoords = {
       x: this.canvas.blocksCountHorizontal - 1,
       y: this.canvas.blocksCountVertical - 1,
@@ -66,7 +64,13 @@ export class KeyControls {
     }
   }
 
-  public controlsHandler(): void {
+  public controlsHandler({
+    onAnyKey,
+    onSpace,
+  }: {
+    onAnyKey: IDummyFunction;
+    onSpace: IDummyFunction;
+  }): void {
     window.addEventListener('keydown', ({ code }) => {
       const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
         this.shape,
@@ -76,26 +80,27 @@ export class KeyControls {
 
       if (code === CODE_UP) {
         this.onKeyUp();
-        this.onAnyKeyPress();
+        onAnyKey();
       }
 
       if (code === CODE_DOWN && !shapeMoveLimitations.has(Side.BOTTOM)) {
         this.shape.moveDown();
-        this.onAnyKeyPress();
+        onAnyKey();
       }
 
       if (code === CODE_LEFT && !shapeMoveLimitations.has(Side.LEFT)) {
         this.shape.moveDirection(Direction.LEFT);
-        this.onAnyKeyPress();
+        onAnyKey();
       }
 
       if (code === CODE_RIGHT && !shapeMoveLimitations.has(Side.RIGHT)) {
         this.shape.moveDirection(Direction.RIGHT);
-        this.onAnyKeyPress();
+        onAnyKey();
       }
 
       if (code === CODE_SPACE) {
         this.onKeySpace();
+        onSpace();
       }
     });
   }

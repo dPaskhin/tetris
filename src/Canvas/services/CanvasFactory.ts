@@ -11,15 +11,15 @@ export class CanvasFactory {
     return new MainCanvas();
   }
 
+  public createShapeCanvas(): ShapeCanvas {
+    return new ShapeCanvas();
+  }
+
   public createGridCanvas(
     id: CanvasId,
     width: number,
     height: number,
   ): GridCanvas {
     return new GridCanvas(id, width, height);
-  }
-
-  public createShapeCanvas(): ShapeCanvas {
-    return new ShapeCanvas();
   }
 }
