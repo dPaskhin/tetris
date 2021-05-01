@@ -18,9 +18,9 @@ export class ShapeHandler {
     private readonly commonService: CommonService,
     private readonly shapeFactory: ShapeFactory,
   ) {
-    const randomShapeType = ShapeType.RECT;
+    const randomShapeType = this.commonService.getRandomShapeType();
     const randomShapeColor = this.commonService.getRandomColor();
-    const futureRandomShapeType = ShapeType.RECT;
+    const futureRandomShapeType = this.commonService.getRandomShapeType();
     const futureRandomShapeColor = this.commonService.getRandomColor();
 
     this.mainShape = shapeFactory.create(randomShapeType, randomShapeColor);
@@ -49,7 +49,7 @@ export class ShapeHandler {
   }
 
   public shapeUpdate(): void {
-    const randomShapeType = ShapeType.RECT;
+    const randomShapeType = this.commonService.getRandomShapeType();
     const randomShapeColor = this.commonService.getRandomColor();
 
     this.mainShape.update(this.futureShapeType, this.futureShapeColor);
