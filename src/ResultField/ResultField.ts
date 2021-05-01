@@ -45,4 +45,8 @@ export class ResultField {
       },
     );
   }
+
+  public reset(): void {
+    this.blockMatrix = [];
+  }
 }

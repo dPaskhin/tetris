@@ -4,6 +4,7 @@ import {
   CODE_RIGHT,
   CODE_SPACE,
   CODE_UP,
+  CODE_O,
 } from 'keycode-js';
 
 import { Shape } from '@src/Shape/Shape';
@@ -15,6 +16,7 @@ import { ICoords } from '@src/Common/interfaces/ICoords';
 import { MainCanvas } from '@src/Canvas/MainCanvas';
 import { ShapeCollisionResolveService } from '@src/Common/services/ShapeCollisionResolveService';
 import { IDummyFunction } from '@src/Common/interfaces/IDummyFunction';
+import { Animation } from '@src/Animation/Animation';
 
 export class KeyControls {
   private readonly canvasBarriersCoords: ICoords;
@@ -23,6 +25,7 @@ export class KeyControls {
     private readonly shape: Shape,
     private readonly resultField: ResultField,
     private readonly canvas: MainCanvas,
+    private readonly animation: Animation,
     private readonly shapeMoveLimitationService: ShapeMoveLimitationService,
     private readonly shapeCollisionResolveService: ShapeCollisionResolveService,
   ) {
@@ -72,6 +75,20 @@ export class KeyControls {
     onSpace: IDummyFunction;
   }): void {
     window.addEventListener('keydown', ({ code }) => {
+      if (this.animation.stopped) {
+        return;
+      }
+
+      if (code === CODE_O) {
+        this.animation.togglePause();
+
+        return;
+      }
+
+      if (this.animation.paused) {
+        return;
+      }
+
       const shapeMoveLimitations = this.shapeMoveLimitationService.getLimitationSides(
         this.shape,
         this.resultField,

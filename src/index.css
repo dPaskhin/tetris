@@ -57,3 +57,36 @@ body {
     font-weight: 600;
     margin-bottom: 10px;
 }
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, .2);
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+@keyframes bubble {
+from { transform: translate(-50%, -50%) scale(0.8) }
+50% { transform: translate(-50%, -50%) scale(1.1) }
+to { transform: translate(-50%, -50%) scale(1) }
+}
+
+.overlay._shown {
+    opacity: 1;
+}
+
+.overlay__icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    fill: #181818;
+}
+
+.overlay._shown .overlay__icon {
+    animation: bubble 200ms;
+}

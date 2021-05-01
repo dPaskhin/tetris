@@ -80,7 +80,6 @@ export class Main {
       )
       .drawGrid();
 
-    this.animation = animationFactory.create();
     this.shapeHandler = this.shapeHandlerFactory.create(this.mainCanvas);
     this.mainShape = this.shapeHandler.mainShape;
     this.futureShape = this.shapeHandler.futureShape;
@@ -97,21 +96,22 @@ export class Main {
       500,
     );
 
+    this.animation = animationFactory.create(
+      this.onAnimatePerFrame.bind(this),
+      this.onAnimatePerStep.bind(this),
+    );
+
     this.keyControlsFactory
       .create({
         shape: this.mainShape,
         resultField: this.resultField,
         canvas: this.mainCanvas,
+        animation: this.animation,
       })
       .controlsHandler({
         onAnyKey: this.preventShapeBottomContact.bind(this),
         onSpace: this.afterShapeBottomContact.bind(this),
       });
-
-    this.animation.animate(
-      () => this.onAnimatePerFrame(),
-      () => this.onAnimatePerStep(),
-    );
   }
 
   private drawBlocks(): void {
@@ -130,7 +130,14 @@ export class Main {
 
   private endGame(): void {
     this.animation.stop();
-    alert('Game over');
+    // eslint-disable-next-line no-alert
+    if (window.confirm('Game over. Another one?')) {
+      this.resultField.reset();
+      this.score.reset();
+      this.shapeHandler.shapeUpdate();
+      this.animation.updateStepTime(1);
+      this.animation.resume();
+    }
   }
 
   private deleteResultFieldFullRows(): void {
